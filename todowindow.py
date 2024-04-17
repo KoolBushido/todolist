@@ -43,7 +43,6 @@ def printlist(strlist: list)->str:
 def goBackHome():
     # first update the list string
     newliststr=printlist(tasklist)
-    print(newliststr)
     window["liststr"].update(newliststr)
 
     #then make sure only the homepage is visible
@@ -155,10 +154,5 @@ while True:
             #if swapping is succssful, go back to home page
             if success:
                 goBackHome()
-
-
-    print(f"Text to add: "+values["addTxt"])
-    print(f"Text to remove: "+values["removeTxt"])
-    print(f"Texts to swap: "+values["swapTxt1"]+" and "+ values["swapTxt2"])
 
 window.close()
