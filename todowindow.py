@@ -3,38 +3,40 @@ import PySimpleGUI as sg
 
 liststr="Todo list:\n"
 tasklist=[]
+
+historystr="History:\n"
+historylist=[]
+
 homelayout=[[sg.Text(liststr, key="liststr")]]
+
+historylayout=[[sg.Text(historystr, key="historystr")]]
 
 addlayout=[[sg.Text("Adding a new item to list", size=(20,1))],
              [sg.Text("Enter the task name you want to add:", size=(15,1))],
             [sg.InputText('', key="addTxt")],
             [sg.Button('Add'), sg.Button('Cancel Add')]]
 
-removeMsg=""
 removelayout=[[sg.Text("Remove an item from list", size=(20,1))],
              [sg.Text("Enter the task id: ", size=(15,1))],
             [sg.InputText('', key="removeTxt")],
-            [sg.Button('Remove'), sg.Button('Cancel Remove')],
-            [sg.Text(removeMsg, key="rmmsg")]]
+            [sg.Button('Remove'), sg.Button('Cancel Remove')]]
 
-swapMsg=""
 swaplayout=[[sg.Text("Swapping two items from list", size=(20,1))],
              [sg.Text("Please input two id's: ", size=(15,1))],
             [sg.InputText('', key="swapTxt1")],
             [sg.InputText('', key="swapTxt2")],
-            [sg.Button('Swap'), sg.Button('Cancel Swap')],
-            [sg.Text(swapMsg, key="swmsg")]]
+            [sg.Button('Swap'), sg.Button('Cancel Swap')]]
 
 # ----------- Create actual layout using Columns and a row of Buttons
-layout = [[sg.Column(homelayout, key='homepage'), sg.Column(addlayout, visible=False, key='addpage'), 
+layout = [[sg.Column(homelayout, key='homepage'), sg.Column(addlayout, visible=False, key='addpage'), sg.Column(historylayout,visible=False, key='historypage'),
            sg.Column(removelayout, visible=False, key='removepage'),sg.Column(swaplayout, visible=False, key='swappage')],
-          [sg.Button('add'), sg.Button('remove'), sg.Button('swap'), sg.Button('Exit')]]
+          [sg.Button('home'),sg.Button('add'), sg.Button('remove'), sg.Button('swap'), sg.Button('history'), sg.Button('Exit')]]
 
 window = sg.Window('Todo list', layout)
 
 #helper function to convert task list into a string
-def printlist(strlist: list)->str:
-    retstr="Todo List:\n"
+def printlist(header: str, strlist: list)->str:
+    retstr=header+"\n"
     for i in range(len(strlist)):
         retstr+=(str(i+1)+". "+strlist[i]+"\n")
     return retstr
@@ -42,11 +44,12 @@ def printlist(strlist: list)->str:
 #function to help go back to home page
 def goBackHome():
     # first update the list string
-    newliststr=printlist(tasklist)
+    newliststr=printlist("Todo list:",tasklist)
     window["liststr"].update(newliststr)
 
     #then make sure only the homepage is visible
     window[f'homepage'].update(visible=True)
+    window[f'historypage'].update(visible=False)
     window[f'addpage'].update(visible=False)
     window[f'removepage'].update(visible=False)
     window[f'swappage'].update(visible=False)
@@ -84,10 +87,15 @@ while True:
         #if user cancels a process, return back to hompage
         goBackHome()
 
+    #home button sends user back to home page
+    elif event == 'home':
+        goBackHome()
+
     #when user goes into the add window
     elif event == 'add':
         # first make sure only the add page is visible
         window[f'homepage'].update(visible=False)
+        window[f'historypage'].update(visible=False)
         window[f'addpage'].update(visible=True)
         window[f'removepage'].update(visible=False)
         window[f'swappage'].update(visible=False)
@@ -107,6 +115,7 @@ while True:
         else:
             #otherwise switch to the remove window
             window[f'homepage'].update(visible=False)
+            window[f'historypage'].update(visible=False)
             window[f'addpage'].update(visible=False)
             window[f'removepage'].update(visible=True)
             window[f'swappage'].update(visible=False)
@@ -123,6 +132,7 @@ while True:
             sg.popup("Please input a number within the bounds of the list")
         #if the number is valid
         else:
+            historylist.append(tasklist[int(target)-1])
             tasklist.pop(int(target)-1)
             goBackHome()
     
@@ -134,6 +144,7 @@ while True:
         #otherwise switch to swap window
         else:
             window[f'homepage'].update(visible=False)
+            window[f'historypage'].update(visible=False)
             window[f'addpage'].update(visible=False)
             window[f'removepage'].update(visible=False)
             window[f'swappage'].update(visible=True)
@@ -154,5 +165,20 @@ while True:
             #if swapping is succssful, go back to home page
             if success:
                 goBackHome()
+    
+    #when user tries to view the history
+    elif event=="history":
+        # first update the list string
+        newhistorystr=printlist("History:",historylist)
+        window["historystr"].update(newhistorystr)
+
+        #then make sure only the homepage is visible
+        window[f'homepage'].update(visible=False)
+        window[f'historypage'].update(visible=True)
+        window[f'addpage'].update(visible=False)
+        window[f'removepage'].update(visible=False)
+        window[f'swappage'].update(visible=False)
+
+    
 
 window.close()
